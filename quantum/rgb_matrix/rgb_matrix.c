@@ -391,7 +391,6 @@ void rgb_matrix_task(void) {
             break;
         case FLUSHING:
             rgb_task_flush(effect);
-            rgb_matrix_power_user(rgb_matrix_config.enable && rgb_matrix_config.hsv.v);
             break;
         case SYNCING:
             rgb_task_sync();
@@ -458,8 +457,6 @@ __attribute__((weak)) bool rgb_matrix_indicators_advanced_kb(uint8_t led_min, ui
 __attribute__((weak)) bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     return true;
 }
-
-__attribute__((weak)) void rgb_matrix_power_user(uint8_t power) {}
 
 void rgb_matrix_init(void) {
     rgb_matrix_driver.init();
