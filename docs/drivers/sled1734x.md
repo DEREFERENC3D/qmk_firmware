@@ -51,16 +51,23 @@ Depending on the ChibiOS board configuration, you may need to [enable and config
 
 ## LED Mapping {#led-mapping}
 
-In order to use this driver, each output must be mapped to an LED index, by adding the following to your `<keyboardname>.c`:
+In order to use this driver, each PWM register must be mapped to an LED index and color channel, by adding the following to your `<keyboardname>.c`:
 
 ```c
-const sled1734x_led PROGMEM g_sled1734x_leds[SLED1734X_LED_COUNT] = {
-/* Driver
- *   |  R         G         B */
-    {0, CA3_D,  CA1_D,  CA2_D},
-    // etc...
+const sled1734x_register_t PROGMEM g_sled1734x_registers[SLED1734X_DRIVER_COUNT][SLED1734X_PWM_REGISTER_COUNT] = {
+    [0] = {
+        // default value: NO_LED
+        [0 ... SLED1734X_PWM_REGISTER_COUNT - 1] = {.led_index = NO_LED, .color_channel = RED},
+
+        [CA3_D] = {.led_index = 0, .color_channel = RED},
+        [CA1_D] = {.led_index = 0, .color_channel = GREEN},
+        [CA2_D] = {.led_index = 0, .color_channel = BLUE},
+        // etc...
+    },
 };
 ```
+
+Each entry specifies which LED index that register drives, and which color channel (`RED`, `GREEN` or `BLUE`) it corresponds to. Registers that aren't wired to an LED should be left at their default value of `NO_LED` — the sparse initializer above sets this default for every register before the specific mappings are applied.
 
 In this example, the red, green and blue channels for the first LED index on driver 0 all have their anodes connected to the `D` pin, and their cathodes on the `CA1`, `CA2` and `CA3` pins respectively.
 
@@ -69,22 +76,26 @@ At the moment, the driver supports MATRIX TYPE 3 only.
 
 ## API {#api}
 
-### `struct sled1734x_led_t` {#api-sled1734x-led-t}
+### `enum sled1734x_color_channel_t` {#api-sled1734x-color-channel-t}
 
-Contains the PWM register addresses for a single RGB LED.
+Lists out the color channels, which a register can control.
 
-#### Members {#api-sled1734x-led-t-members}
+#### Values {#api-sled1734x-color-channel-t-values}
 
- - `uint8_t driver`
-   The driver index of the LED, from 0 to 3.
- - `uint8_t r`
-   The output PWM register address for the LED's red channel (RGB driver only).
- - `uint8_t g`
-   The output PWM register address for the LED's green channel (RGB driver only).
- - `uint8_t b`
-   The output PWM register address for the LED's blue channel (RGB driver only).
- - `uint8_t v`
-   The output PWM register address for the LED (single-color driver only).
+ - `RED`
+ - `GREEN`
+ - `BLUE`
+
+### `struct sled1734x_register_t` {#api-sled1734x-register-t}
+
+Describes which LED index and color channel a single PWM register is wired to. One entry exists for every register in the `g_sled1734x_registers` table.
+
+#### Members {#api-sled1734x-register-t-members}
+
+ - `uint8_t led_index`
+   The index of the LED that this register drives, or `NO_LED` if the register isn't connected to an LED.
+ - `sled1734x_color_channel_t color`
+   The color channel that this register drives: `RED`, `GREEN` or `BLUE`.
 
 ---
 
@@ -134,7 +145,7 @@ Set the color of a single LED (RGB driver only). This function does not immediat
 #### Arguments {#api-sled1734x-set-color-arguments}
 
  - `int index`
-   The LED index (ie. the index into the `g_sled1734x_leds` array).
+   The LED index, as referenced by the `index` field of entries in the `g_sled1734x_registers` table.
  - `uint8_t red`
    The red value to set.
  - `uint8_t green`
@@ -166,7 +177,7 @@ Configure the LED control registers for a single LED (RGB driver only). This fun
 #### Arguments {#api-sled1734x-set-led-control-register-rgb-arguments}
 
  - `uint8_t index`
-   The LED index (ie. the index into the `g_sled1734x_leds` array).
+   The LED index, as referenced by the `index` field of entries in the `g_sled1734x_registers` table.
  - `bool red`
    Enable or disable the red channel.
  - `bool green`
