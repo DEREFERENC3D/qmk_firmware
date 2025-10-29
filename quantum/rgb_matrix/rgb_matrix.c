@@ -70,6 +70,7 @@ uint8_t g_rgb_frame_buffer[MATRIX_ROWS][MATRIX_COLS] = {{0}};
 #endif // RGB_MATRIX_FRAMEBUFFER_EFFECTS
 #ifdef RGB_MATRIX_KEYREACTIVE_ENABLED
 last_hit_t g_last_hit_tracker;
+key_tracker_mode_t g_last_hit_tracker_mode = KEYPRESSES;
 #endif // RGB_MATRIX_KEYREACTIVE_ENABLED
 
 #ifndef RGB_MATRIX_FLAG_STEPS
@@ -194,6 +195,20 @@ void rgb_matrix_set_color_all(uint8_t red, uint8_t green, uint8_t blue) {
 #endif
 }
 
+#ifdef RGB_MATRIX_KEYREACTIVE_ENABLED
+void rgb_matrix_switch_key_tracker_mode(key_tracker_mode_t mode) {
+    if (g_last_hit_tracker_mode == mode) return;
+
+    if (g_last_hit_tracker_mode == KEYPRESSES_AND_RELEASES) {
+        for (uint8_t j = 0; j < LED_HITS_TO_REMEMBER; j++) {
+                last_hit_buffer.should_tick[j] = true;
+        }
+    }
+
+    g_last_hit_tracker_mode = mode;
+}
+#endif
+
 void rgb_matrix_handle_key_event(uint8_t row, uint8_t col, bool pressed) {
 #ifndef RGB_MATRIX_SPLIT
     if (!is_keyboard_master()) return;
@@ -203,42 +218,34 @@ void rgb_matrix_handle_key_event(uint8_t row, uint8_t col, bool pressed) {
     uint8_t led[LED_HITS_TO_REMEMBER];
     uint8_t led_count = 0;
 
-#    ifndef RGB_MATRIX_KEYPRESSES_AND_RELEASES
-#       if defined(RGB_MATRIX_KEYRELEASES)
-    if (!pressed)
-#       elif defined(RGB_MATRIX_KEYPRESSES)
-    if (pressed)
-#       endif // defined(RGB_MATRIX_KEYRELEASES)
-#    endif // RGB_MATRIX_KEYPRESSES_AND_RELEASES
+    if (
+        (g_last_hit_tracker_mode == KEYPRESSES && pressed) ||
+        (g_last_hit_tracker_mode == KEYRELEASES && !pressed) ||
+        g_last_hit_tracker_mode == KEYPRESSES_AND_RELEASES
+    ) {
         led_count = rgb_matrix_map_row_column_to_led(row, col, led);
+    }
 
     if (last_hit_buffer.count + led_count > LED_HITS_TO_REMEMBER) {
         memcpy(&last_hit_buffer.x[0], &last_hit_buffer.x[led_count], LED_HITS_TO_REMEMBER - led_count);
         memcpy(&last_hit_buffer.y[0], &last_hit_buffer.y[led_count], LED_HITS_TO_REMEMBER - led_count);
         memcpy(&last_hit_buffer.tick[0], &last_hit_buffer.tick[led_count], (LED_HITS_TO_REMEMBER - led_count) * 2); // 16 bit
         memcpy(&last_hit_buffer.index[0], &last_hit_buffer.index[led_count], LED_HITS_TO_REMEMBER - led_count);
-        #ifdef RGB_MATRIX_KEYPRESSES_AND_RELEASES
         memcpy(&last_hit_buffer.should_tick[0], &last_hit_buffer.should_tick[led_count], LED_HITS_TO_REMEMBER - led_count);
-        #endif
         last_hit_buffer.count = LED_HITS_TO_REMEMBER - led_count;
     }
 
-#ifdef RGB_MATRIX_KEYPRESSES_AND_RELEASES
-    if (pressed) {
-#endif
-    for (uint8_t i = 0; i < led_count; i++) {
-        uint8_t index                = last_hit_buffer.count;
-        last_hit_buffer.x[index]     = g_led_config.point[led[i]].x;
-        last_hit_buffer.y[index]     = g_led_config.point[led[i]].y;
-        last_hit_buffer.index[index] = led[i];
-        last_hit_buffer.tick[index]  = 0;
-#ifdef RGB_MATRIX_KEYPRESSES_AND_RELEASES
-        last_hit_buffer.should_tick[index]  = false;
-#endif
-        last_hit_buffer.count++;
-    }
-#ifdef RGB_MATRIX_KEYPRESSES_AND_RELEASES
-    } else {
+    if (g_last_hit_tracker_mode != KEYPRESSES_AND_RELEASES || pressed) {
+        for (uint8_t i = 0; i < led_count; i++) {
+            uint8_t index                = last_hit_buffer.count;
+            last_hit_buffer.x[index]     = g_led_config.point[led[i]].x;
+            last_hit_buffer.y[index]     = g_led_config.point[led[i]].y;
+            last_hit_buffer.index[index] = led[i];
+            last_hit_buffer.tick[index]  = 0;
+            last_hit_buffer.should_tick[index]  = g_last_hit_tracker_mode != KEYPRESSES_AND_RELEASES;
+            last_hit_buffer.count++;
+        }
+    } else if (g_last_hit_tracker_mode == KEYPRESSES_AND_RELEASES) {
         for (uint8_t i = 0; i < led_count; i++) {
             for (uint8_t j = 0; j < LED_HITS_TO_REMEMBER; j++) {
                 if (last_hit_buffer.index[j] == led[i]) {
@@ -247,7 +254,6 @@ void rgb_matrix_handle_key_event(uint8_t row, uint8_t col, bool pressed) {
             }
         }
     }
-#endif
 #endif // RGB_MATRIX_KEYREACTIVE_ENABLED
 
 #if defined(RGB_MATRIX_FRAMEBUFFER_EFFECTS) && defined(ENABLE_RGB_MATRIX_TYPING_HEATMAP)

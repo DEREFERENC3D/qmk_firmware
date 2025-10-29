@@ -5,6 +5,11 @@
 typedef hsv_t (*reactive_splash_f)(hsv_t hsv, int16_t dx, int16_t dy, uint8_t dist, uint16_t tick);
 
 bool effect_runner_reactive_splash(uint8_t start, effect_params_t* params, reactive_splash_f effect_func) {
+    #if defined(RGB_MATRIX_KEYPRESSES)
+    rgb_matrix_switch_key_tracker_mode(KEYPRESSES);
+    #elif defined(RGB_MATRIX_KEYRELEASES)
+    rgb_matrix_switch_key_tracker_mode(KEYRELEASES);
+    #endif
     RGB_MATRIX_USE_LIMITS(led_min, led_max);
 
     uint8_t count = g_last_hit_tracker.count;

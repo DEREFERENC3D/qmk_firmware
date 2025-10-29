@@ -298,6 +298,8 @@ extern uint32_t     g_rgb_timer;
 extern led_config_t g_led_config;
 #ifdef RGB_MATRIX_KEYREACTIVE_ENABLED
 extern last_hit_t g_last_hit_tracker;
+extern key_tracker_mode_t g_last_hit_tracker_mode;
+void rgb_matrix_switch_key_tracker_mode(key_tracker_mode_t);
 #endif
 #ifdef RGB_MATRIX_FRAMEBUFFER_EFFECTS
 extern uint8_t g_rgb_frame_buffer[MATRIX_ROWS][MATRIX_COLS];

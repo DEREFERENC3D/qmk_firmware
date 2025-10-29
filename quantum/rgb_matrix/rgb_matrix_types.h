@@ -39,10 +39,13 @@ typedef struct PACKED {
     uint8_t  y[LED_HITS_TO_REMEMBER];
     uint8_t  index[LED_HITS_TO_REMEMBER];
     uint16_t tick[LED_HITS_TO_REMEMBER];
-#ifdef RGB_MATRIX_KEYPRESSES_AND_RELEASES
     bool should_tick[LED_HITS_TO_REMEMBER];
-#endif
 } last_hit_t;
+typedef enum {
+    KEYPRESSES,
+    KEYRELEASES,
+    KEYPRESSES_AND_RELEASES,
+} key_tracker_mode_t;
 #endif // RGB_MATRIX_KEYREACTIVE_ENABLED
 
 typedef enum rgb_task_states { STARTING, RENDERING, FLUSHING, SYNCING } rgb_task_states;
