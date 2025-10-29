@@ -203,31 +203,51 @@ void rgb_matrix_handle_key_event(uint8_t row, uint8_t col, bool pressed) {
     uint8_t led[LED_HITS_TO_REMEMBER];
     uint8_t led_count = 0;
 
-#    if defined(RGB_MATRIX_KEYRELEASES)
+#    ifndef RGB_MATRIX_KEYPRESSES_AND_RELEASES
+#       if defined(RGB_MATRIX_KEYRELEASES)
     if (!pressed)
-#    elif defined(RGB_MATRIX_KEYPRESSES)
+#       elif defined(RGB_MATRIX_KEYPRESSES)
     if (pressed)
-#    endif // defined(RGB_MATRIX_KEYRELEASES)
-    {
+#       endif // defined(RGB_MATRIX_KEYRELEASES)
+#    endif // RGB_MATRIX_KEYPRESSES_AND_RELEASES
         led_count = rgb_matrix_map_row_column_to_led(row, col, led);
-    }
 
     if (last_hit_buffer.count + led_count > LED_HITS_TO_REMEMBER) {
         memcpy(&last_hit_buffer.x[0], &last_hit_buffer.x[led_count], LED_HITS_TO_REMEMBER - led_count);
         memcpy(&last_hit_buffer.y[0], &last_hit_buffer.y[led_count], LED_HITS_TO_REMEMBER - led_count);
         memcpy(&last_hit_buffer.tick[0], &last_hit_buffer.tick[led_count], (LED_HITS_TO_REMEMBER - led_count) * 2); // 16 bit
         memcpy(&last_hit_buffer.index[0], &last_hit_buffer.index[led_count], LED_HITS_TO_REMEMBER - led_count);
+        #ifdef RGB_MATRIX_KEYPRESSES_AND_RELEASES
+        memcpy(&last_hit_buffer.should_tick[0], &last_hit_buffer.should_tick[led_count], LED_HITS_TO_REMEMBER - led_count);
+        #endif
         last_hit_buffer.count = LED_HITS_TO_REMEMBER - led_count;
     }
 
+#ifdef RGB_MATRIX_KEYPRESSES_AND_RELEASES
+    if (pressed) {
+#endif
     for (uint8_t i = 0; i < led_count; i++) {
         uint8_t index                = last_hit_buffer.count;
         last_hit_buffer.x[index]     = g_led_config.point[led[i]].x;
         last_hit_buffer.y[index]     = g_led_config.point[led[i]].y;
         last_hit_buffer.index[index] = led[i];
         last_hit_buffer.tick[index]  = 0;
+#ifdef RGB_MATRIX_KEYPRESSES_AND_RELEASES
+        last_hit_buffer.should_tick[index]  = false;
+#endif
         last_hit_buffer.count++;
     }
+#ifdef RGB_MATRIX_KEYPRESSES_AND_RELEASES
+    } else {
+        for (uint8_t i = 0; i < led_count; i++) {
+            for (uint8_t j = 0; j < LED_HITS_TO_REMEMBER; j++) {
+                if (last_hit_buffer.index[j] == led[i]) {
+                    last_hit_buffer.should_tick[j] = true;
+                }
+            }
+        }
+    }
+#endif
 #endif // RGB_MATRIX_KEYREACTIVE_ENABLED
 
 #if defined(RGB_MATRIX_FRAMEBUFFER_EFFECTS) && defined(ENABLE_RGB_MATRIX_TYPING_HEATMAP)
@@ -287,6 +307,10 @@ static void rgb_task_timers(void) {
 #ifdef RGB_MATRIX_KEYREACTIVE_ENABLED
     uint8_t count = last_hit_buffer.count;
     for (uint8_t i = 0; i < count; ++i) {
+#ifdef RGB_MATRIX_KEYPRESSES_AND_RELEASES
+        if (!last_hit_buffer.should_tick[i]) continue;
+#endif
+
         if (UINT16_MAX - deltaTime < last_hit_buffer.tick[i]) {
             last_hit_buffer.count--;
             continue;
