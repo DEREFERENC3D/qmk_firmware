@@ -8,6 +8,20 @@ enum layer_names {
     FN,
 };
 
+enum custom_keycode {
+    RM_LEFT = SAFE_RANGE,
+    RM_MOD1,
+    RM_MOD2,
+    RM_MOD3,
+    RM_MOD4,
+    RM_MOD5,
+    RM_MOD6,
+    RM_MOD7,
+    RM_MOD8,
+    RM_MOD9,
+    RM_RGHT,
+};
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [BASE] = LAYOUT_fullsize_ansi(
         KC_ESC,           KC_F1,   KC_F2, KC_F3, KC_F4, KC_F5, KC_F6, KC_F7, KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  KC_PSCR, KC_SCRL, KC_PAUS,
@@ -26,11 +40,96 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, KC_NO,   _______,                            _______,                            _______, _______, _______, _______, _______, _______, _______, _______, _______
     ),
     [FN] = LAYOUT_fullsize_ansi(
-        _______,            KC_MSEL, KC_VOLD, KC_VOLU, KC_MUTE, KC_MSTP, KC_MPRV, KC_MPLY, KC_MNXT, KC_MAIL, KC_WHOM, KC_CALC, KC_WSCH, _______, _______, _______,
-        _______, _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, RM_SPDD, RM_SPDU, _______, _______, _______, _______, _______, _______, _______, _______,
-        _______, _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
+        _______,            KC_MSEL, KC_VOLD, KC_VOLU, KC_MUTE, KC_MSTP, KC_MPRV, KC_MPLY, KC_MNXT, KC_MAIL, KC_WHOM, KC_CALC, KC_WSCH, RM_MOD7, RM_MOD8, RM_MOD9,
+        _______, _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, RM_SPDD, RM_SPDU, _______, RM_MOD1, RM_MOD2, RM_MOD3, _______, _______, _______, _______,
+        _______, _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, RM_MOD4, RM_MOD5, RM_MOD6, _______, _______, _______, _______,
         _______, _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______,                            _______, _______, _______,
         _______,            _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______,          RM_VALU,          _______, _______, _______, _______,
-        _______, TG(WINLK), _______,                            _______,                            _______, _______, _______, _______, RM_PREV, RM_VALD, RM_NEXT, _______, _______
+        _______, TG(WINLK), _______,                            _______,                            _______, _______, _______, _______, RM_LEFT, RM_VALD, RM_RGHT, _______, _______
     ),
 };
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case RM_LEFT:
+            if (record->event.pressed) {
+                // TODO: Set direction for supported effects
+            }
+            return false;
+        case RM_MOD1:
+            if (record->event.pressed) {
+#ifdef ENABLE_RGB_MATRIX_CYCLE_ALL
+                rgb_matrix_mode(RGB_MATRIX_CYCLE_ALL);
+#endif // ENABLE_RGB_MATRIX_CYCLE_ALL
+            }
+            return false;
+        case RM_MOD2:
+            if (record->event.pressed) {
+#ifdef ENABLE_RGB_MATRIX_SOLID_MULTISPLASH
+                rgb_matrix_mode(RGB_MATRIX_SOLID_MULTISPLASH);
+#endif // ENABLE_RGB_MATRIX_SOLID_MULTISPLASH
+            }
+            return false;
+        case RM_MOD3:
+            if (record->event.pressed) {
+                // TODO: Implement effect
+#ifdef ENABLE_RGB_MATRIX_
+                rgb_matrix_mode(RGB_MATRIX_);
+#endif // ENABLE_RGB_MATRIX_
+            }
+            return false;
+        case RM_MOD4:
+            if (record->event.pressed) {
+#ifdef ENABLE_RGB_MATRIX_CYCLE_LEFT_RIGHT
+                rgb_matrix_mode(RGB_MATRIX_CYCLE_LEFT_RIGHT);
+#endif // ENABLE_RGB_MATRIX_CYCLE_LEFT_RIGHT
+            }
+            return false;
+        case RM_MOD5:
+            if (record->event.pressed) {
+#ifdef RGB_MATRIX_ENABLE
+                rgb_matrix_mode(RGB_MATRIX_SOLID_COLOR);
+#endif // RGB_MATRIX_ENABLE
+            }
+            return false;
+        case RM_MOD6:
+            if (record->event.pressed) {
+#ifdef ENABLE_RGB_MATRIX_SOLID_REACTIVE_MULTIWIDE
+                rgb_matrix_mode(RGB_MATRIX_SOLID_REACTIVE_MULTIWIDE);
+#endif // ENABLE_RGB_MATRIX_SOLID_REACTIVE_MULTIWIDE
+            }
+            return false;
+        case RM_MOD7:
+            if (record->event.pressed) {
+                // TODO: Implement effect
+#ifdef ENABLE_RGB_MATRIX_
+                rgb_matrix_mode(RGB_MATRIX_);
+#endif // ENABLE_RGB_MATRIX_
+            }
+            return false;
+        case RM_MOD8:
+            if (record->event.pressed) {
+#ifdef ENABLE_RGB_MATRIX_CYCLE_OUT_IN
+                rgb_matrix_mode(RGB_MATRIX_CYCLE_OUT_IN);
+#endif // ENABLE_RGB_MATRIX_CYCLE_OUT_IN
+            }
+            return false;
+        case RM_MOD9:
+            if (record->event.pressed) {
+                // TODO: Implement effect
+#ifdef ENABLE_RGB_MATRIX_
+                rgb_matrix_mode(RGB_MATRIX_);
+#endif // ENABLE_RGB_MATRIX_
+            }
+            return false;
+        case RM_RGHT:
+            if (record->event.pressed) {
+                // TODO: Set direction for supported effects
+            }
+            return false;
+        default:
+            break;
+    }
+
+    return true;
+}
