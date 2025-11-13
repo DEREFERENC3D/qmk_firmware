@@ -44,6 +44,14 @@ bool effect_runner_i_custom(effect_params_t* params, i_f effect_func) {
         paused_time = 0;
     }
 
+    static uint8_t last_speed = 0;
+    if (speed != last_speed) {
+        uint8_t old_raw = scale16by8(g_rgb_timer, last_speed);
+        last_raw_time += raw_time - old_raw;
+
+        last_speed = speed;
+    }
+
      int8_t diff = (int8_t)(raw_time - last_raw_time);
 
      switch (rgb_matrix_direction) {
