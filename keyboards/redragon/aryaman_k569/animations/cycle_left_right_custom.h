@@ -2,8 +2,21 @@
 RGB_MATRIX_EFFECT(CYCLE_LEFT_RIGHT)
 #    ifdef RGB_MATRIX_CUSTOM_EFFECT_IMPLS
 
+// these must match the x coordinates of the first and last LED
+#define COLUMN_SIDE_LEFT 0
+#define COLUMN_SIDE_RIGHT 240
+
 static hsv_t CYCLE_LEFT_RIGHT_math(hsv_t hsv, uint8_t i, uint8_t time) {
-    hsv.h = g_led_config.point[i].x - time;
+    uint8_t location = g_led_config.point[i].x;
+
+#       ifdef RGB_MATRIX_CUSTOM_CYCLE_LEFT_RIGHT_SIDES_RUN_SIDEWAYS
+    if (location == COLUMN_SIDE_LEFT || location == COLUMN_SIDE_RIGHT) {
+        location = g_led_config.point[i].y;
+    }
+#       endif // RGB_MATRIX_CUSTOM_CYCLE_LEFT_RIGHT_SIDES_RUN_SIDEWAYS
+
+    hsv.h = location - time;
+
     return hsv;
 }
 
