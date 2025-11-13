@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include QMK_KEYBOARD_H
 
+#include "../../animations/util/direction.h"
+
 enum layer_names {
     BASE,
     WINLK,
@@ -49,11 +51,40 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 };
 
+rgb_direction_t rgb_matrix_direction = RIGHT;
+
+const uint8_t PROGMEM rgb_matrix_direction_supported_modes[] = {
+#ifdef ENABLE_RGB_MATRIX_CUSTOM_CYCLE_ALL
+    RGB_MATRIX_CUSTOM_CYCLE_ALL,
+#endif // ENABLE_RGB_MATRIX_CUSTOM_CYCLE_ALL
+};
+const uint8_t PROGMEM rgb_matrix_direction_supported_modes_count = sizeof(rgb_matrix_direction_supported_modes) / sizeof(rgb_matrix_direction_supported_modes[0]);
+
+void rgb_matrix_direction_or_hue(rgb_direction_t value) {
+    uint8_t mode = rgb_matrix_get_mode();
+    for (uint8_t i = 0; i < pgm_read_byte(&rgb_matrix_direction_supported_modes_count); i++) {
+        if (mode == pgm_read_byte(&rgb_matrix_direction_supported_modes[i])) {
+            rgb_matrix_direction = value;
+            return;
+        }
+    }
+
+    // fallback as hue control
+    switch (value) {
+        case LEFT:
+            rgb_matrix_decrease_hue();
+            break;
+        case RIGHT:
+            rgb_matrix_increase_hue();
+            break;
+    }
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case RM_LEFT:
             if (record->event.pressed) {
-                // TODO: Set direction for supported effects
+                rgb_matrix_direction_or_hue(LEFT);
             }
             return false;
         case RM_MOD1:
@@ -124,7 +155,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
         case RM_RGHT:
             if (record->event.pressed) {
-                // TODO: Set direction for supported effects
+                rgb_matrix_direction_or_hue(RIGHT);
             }
             return false;
         default:
