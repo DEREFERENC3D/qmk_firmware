@@ -1,7 +1,6 @@
 #ifdef RGB_MATRIX_ENABLE
-// Enable stock QMK versions of these effects
 // RM_MOD1
-#define ENABLE_RGB_MATRIX_CYCLE_ALL
+#define ENABLE_RGB_MATRIX_CUSTOM_CYCLE_ALL
 // RM_MOD2
 #define ENABLE_RGB_MATRIX_SOLID_MULTISPLASH
 // RM_MOD4

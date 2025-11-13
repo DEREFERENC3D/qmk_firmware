@@ -58,9 +58,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
         case RM_MOD1:
             if (record->event.pressed) {
-#ifdef ENABLE_RGB_MATRIX_CYCLE_ALL
-                rgb_matrix_mode(RGB_MATRIX_CYCLE_ALL);
-#endif // ENABLE_RGB_MATRIX_CYCLE_ALL
+#ifdef ENABLE_RGB_MATRIX_CUSTOM_CYCLE_ALL
+                rgb_matrix_mode(RGB_MATRIX_CUSTOM_CYCLE_ALL);
+#endif // ENABLE_RGB_MATRIX_CUSTOM_CYCLE_ALL
             }
             return false;
         case RM_MOD2:
