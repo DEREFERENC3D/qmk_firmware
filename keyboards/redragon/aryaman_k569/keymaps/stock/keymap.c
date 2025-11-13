@@ -57,6 +57,9 @@ const uint8_t PROGMEM rgb_matrix_direction_supported_modes[] = {
 #ifdef ENABLE_RGB_MATRIX_CUSTOM_CYCLE_ALL
     RGB_MATRIX_CUSTOM_CYCLE_ALL,
 #endif // ENABLE_RGB_MATRIX_CUSTOM_CYCLE_ALL
+#ifdef ENABLE_RGB_MATRIX_CUSTOM_CYCLE_LEFT_RIGHT
+    RGB_MATRIX_CUSTOM_CYCLE_LEFT_RIGHT,
+#endif // ENABLE_RGB_MATRIX_CUSTOM_CYCLE_LEFT_RIGHT
 };
 const uint8_t PROGMEM rgb_matrix_direction_supported_modes_count = sizeof(rgb_matrix_direction_supported_modes) / sizeof(rgb_matrix_direction_supported_modes[0]);
 
@@ -126,9 +129,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
         case RM_MOD4:
             if (record->event.pressed) {
-#ifdef ENABLE_RGB_MATRIX_CYCLE_LEFT_RIGHT
-                rgb_matrix_mode(RGB_MATRIX_CYCLE_LEFT_RIGHT);
-#endif // ENABLE_RGB_MATRIX_CYCLE_LEFT_RIGHT
+#ifdef ENABLE_RGB_MATRIX_CUSTOM_CYCLE_LEFT_RIGHT
+                rgb_matrix_mode_or_pause(RGB_MATRIX_CUSTOM_CYCLE_LEFT_RIGHT);
+#endif // ENABLE_RGB_MATRIX_CUSTOM_CYCLE_LEFT_RIGHT
             }
             return false;
         case RM_MOD5:
