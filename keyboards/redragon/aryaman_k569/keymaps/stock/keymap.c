@@ -80,6 +80,21 @@ void rgb_matrix_direction_or_hue(rgb_direction_t value) {
     }
 }
 
+bool rgb_matrix_run = true;
+
+void rgb_matrix_mode_or_pause(uint8_t mode) {
+    uint8_t current = rgb_matrix_get_mode();
+
+    if (mode == current) {
+        rgb_matrix_run = !rgb_matrix_run;
+    } else {
+        if (!rgb_matrix_run) {
+            rgb_matrix_run = true;
+        }
+        rgb_matrix_mode(mode);
+    }
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case RM_LEFT:
@@ -90,7 +105,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case RM_MOD1:
             if (record->event.pressed) {
 #ifdef ENABLE_RGB_MATRIX_CUSTOM_CYCLE_ALL
-                rgb_matrix_mode(RGB_MATRIX_CUSTOM_CYCLE_ALL);
+                rgb_matrix_mode_or_pause(RGB_MATRIX_CUSTOM_CYCLE_ALL);
 #endif // ENABLE_RGB_MATRIX_CUSTOM_CYCLE_ALL
             }
             return false;
