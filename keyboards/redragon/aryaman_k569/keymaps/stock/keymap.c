@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include QMK_KEYBOARD_H
 
+#ifdef RGB_MATRIX_ENABLE
 #include "../../animations/util/direction.h"
+#endif // RGB_MATRIX_ENABLE
 
 enum layer_names {
     BASE,
@@ -51,6 +53,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 };
 
+#ifdef RGB_MATRIX_ENABLE
 rgb_direction_t rgb_matrix_direction = RIGHT;
 
 const uint8_t PROGMEM rgb_matrix_direction_supported_modes[] = {
@@ -170,12 +173,15 @@ void rgb_matrix_mode_or_hue(uint8_t mode) {
         rgb_matrix_config.hsv.v
     );
 }
+#endif // RGB_MATRIX_ENABLE
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case RM_LEFT:
             if (record->event.pressed) {
+#ifdef RGB_MATRIX_ENABLE
                 rgb_matrix_direction_or_hue(LEFT);
+#endif // RGB_MATRIX_ENABLE
             }
             return false;
         case RM_MOD1:
@@ -246,7 +252,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
         case RM_RGHT:
             if (record->event.pressed) {
+#ifdef RGB_MATRIX_ENABLE
                 rgb_matrix_direction_or_hue(RIGHT);
+#endif // RGB_MATRIX_ENABLE
             }
             return false;
         default:
