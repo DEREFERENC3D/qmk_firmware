@@ -101,6 +101,76 @@ void rgb_matrix_mode_or_pause(uint8_t mode) {
     }
 }
 
+/**
+ * stock firmware colors, read from the stock app, in RGB
+ * red: 255, 7, 0
+ * orange: 255, 64, 16
+ * yellow: 255, 255, 16
+ * green: 7, 255, 0
+ * light blue / cyan: 0, 255, 255
+ * blue: 0, 0, 255
+ * purple: 96, 0, 255
+ * white: 255, 255, 255
+ */
+ const uint8_t PROGMEM STOCK_HUE_STEPS[] = {
+    2, // red
+    8, // orange
+    42, // yellow
+    86, // green
+    128, // cyan
+    170, // blue
+    186, // purple,
+    0, // white
+};
+const uint8_t PROGMEM STOCK_SAT_STEPS[] = {
+    255, // red
+    240, // orange
+    240, // yellow
+    248, // green
+    255, // cyan
+    255, // blue
+    255, // purple,
+    0, // white,
+};
+const uint8_t PROGMEM STOCK_STEPS_COUNT = sizeof(STOCK_HUE_STEPS) / sizeof(STOCK_HUE_STEPS[0]);
+const uint8_t PROGMEM STOCK_STEPS_LAST = STOCK_STEPS_COUNT-1;
+
+bool rgb_matrix_rainbow_color = false;
+void rgb_matrix_mode_or_hue(uint8_t mode) {
+    uint8_t current = rgb_matrix_get_mode();
+
+    if (mode != current) {
+        rgb_matrix_mode(mode);
+        return;
+    }
+
+    uint8_t step = 255;
+    for (uint8_t i = 0; i < STOCK_STEPS_COUNT; i++) {
+        if (
+            pgm_read_byte(&STOCK_HUE_STEPS[i]) == rgb_matrix_config.hsv.h &&
+            pgm_read_byte(&STOCK_SAT_STEPS[i]) == rgb_matrix_config.hsv.s
+        ) {
+            step = i;
+            break;
+        }
+    }
+
+    if (mode == RGB_MATRIX_SOLID_COLOR) rgb_matrix_rainbow_color = false;
+
+    if (step == STOCK_STEPS_LAST && mode != RGB_MATRIX_SOLID_COLOR) {
+        rgb_matrix_rainbow_color = !rgb_matrix_rainbow_color;
+
+        if (rgb_matrix_rainbow_color) return;
+    }
+
+    step = step >= STOCK_STEPS_LAST ? 0 : step + 1;
+    rgb_matrix_sethsv(
+        pgm_read_byte(&STOCK_HUE_STEPS[step]),
+        pgm_read_byte(&STOCK_SAT_STEPS[step]),
+        rgb_matrix_config.hsv.v
+    );
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case RM_LEFT:
@@ -118,7 +188,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case RM_MOD2:
             if (record->event.pressed) {
 #ifdef ENABLE_RGB_MATRIX_SOLID_MULTISPLASH
-                rgb_matrix_mode(RGB_MATRIX_SOLID_MULTISPLASH);
+                rgb_matrix_mode_or_hue(RGB_MATRIX_SOLID_MULTISPLASH);
 #endif // ENABLE_RGB_MATRIX_SOLID_MULTISPLASH
             }
             return false;
@@ -140,14 +210,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case RM_MOD5:
             if (record->event.pressed) {
 #ifdef RGB_MATRIX_ENABLE
-                rgb_matrix_mode(RGB_MATRIX_SOLID_COLOR);
+                rgb_matrix_mode_or_hue(RGB_MATRIX_SOLID_COLOR);
 #endif // RGB_MATRIX_ENABLE
             }
             return false;
         case RM_MOD6:
             if (record->event.pressed) {
 #ifdef ENABLE_RGB_MATRIX_SOLID_REACTIVE_MULTIWIDE
-                rgb_matrix_mode(RGB_MATRIX_SOLID_REACTIVE_MULTIWIDE);
+                rgb_matrix_mode_or_hue(RGB_MATRIX_SOLID_REACTIVE_MULTIWIDE);
 #endif // ENABLE_RGB_MATRIX_SOLID_REACTIVE_MULTIWIDE
             }
             return false;
