@@ -159,7 +159,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case RM_MOD8:
             if (record->event.pressed) {
 #ifdef ENABLE_RGB_MATRIX_CUSTOM_CYCLE_OUT_IN
-                rgb_matrix_mode(RGB_MATRIX_CUSTOM_CYCLE_OUT_IN);
+                rgb_matrix_mode_or_pause(RGB_MATRIX_CUSTOM_CYCLE_OUT_IN);
 #endif // ENABLE_RGB_MATRIX_CUSTOM_CYCLE_OUT_IN
             }
             return false;
