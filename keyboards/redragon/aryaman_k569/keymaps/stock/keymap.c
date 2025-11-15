@@ -173,6 +173,33 @@ void rgb_matrix_mode_or_hue(uint8_t mode) {
         rgb_matrix_config.hsv.v
     );
 }
+
+#   ifdef RGB_MATRIX_SOLID_COLOR_RAINBOW_SIDES
+const uint8_t PROGMEM LEFT_SIDE_LEDS[] = {0, 18, 41, 64, 82, 101, 116};
+const uint8_t PROGMEM RIGHT_SIDE_LEDS[] = {17, 40, 63, 81, 100, 115, 117};
+const uint8_t PROGMEM SIDE_LED_COUNT = sizeof(LEFT_SIDE_LEDS) / sizeof(LEFT_SIDE_LEDS[0]);
+#   endif // RGB_MATRIX_SOLID_COLOR_RAINBOW_SIDES
+
+bool rgb_matrix_indicators_user(void) {
+#   ifdef RGB_MATRIX_SOLID_COLOR_RAINBOW_SIDES
+    if (rgb_matrix_get_mode() == RGB_MATRIX_SOLID_COLOR) {
+        for (uint8_t i = 0; i < SIDE_LED_COUNT; i++) {
+            hsv_t hsv = {
+                .h = pgm_read_byte(&STOCK_HUE_STEPS[i]),
+                .s = pgm_read_byte(&STOCK_SAT_STEPS[i]),
+                .v = rgb_matrix_config.hsv.v,
+            };
+
+            rgb_t rgb = hsv_to_rgb(hsv);
+
+            rgb_matrix_set_color(pgm_read_byte(&LEFT_SIDE_LEDS[i]), rgb.r, rgb.g, rgb.b);
+            rgb_matrix_set_color(pgm_read_byte(&RIGHT_SIDE_LEDS[i]), rgb.r, rgb.g, rgb.b);
+        }
+    }
+#   endif // RGB_MATRIX_SOLID_COLOR_RAINBOW_SIDES
+
+    return true;
+}
 #endif // RGB_MATRIX_ENABLE
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {

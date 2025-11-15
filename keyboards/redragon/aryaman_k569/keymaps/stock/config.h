@@ -1,4 +1,6 @@
 #ifdef RGB_MATRIX_ENABLE
+// stock-like side LED behavior for SOLID_COLOR mode
+//#define RGB_MATRIX_SOLID_COLOR_RAINBOW_SIDES
 // RM_MOD1
 #define ENABLE_RGB_MATRIX_CUSTOM_CYCLE_ALL
 // RM_MOD2
