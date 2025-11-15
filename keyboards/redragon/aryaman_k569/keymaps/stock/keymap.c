@@ -227,10 +227,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
         case RM_MOD3:
             if (record->event.pressed) {
-                // TODO: Implement effect
-#ifdef ENABLE_RGB_MATRIX_
-                rgb_matrix_mode(RGB_MATRIX_);
-#endif // ENABLE_RGB_MATRIX_
+#ifdef ENABLE_RGB_MATRIX_CUSTOM_RAINBOW_WAVE
+                rgb_matrix_mode_or_pause(RGB_MATRIX_CUSTOM_RAINBOW_WAVE);
+#endif // ENABLE_RGB_MATRIX_CUSTOM_RAINBOW_WAVE
             }
             return false;
         case RM_MOD4:
