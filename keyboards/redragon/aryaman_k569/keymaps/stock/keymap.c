@@ -60,6 +60,9 @@ const uint8_t PROGMEM rgb_matrix_direction_supported_modes[] = {
 #ifdef ENABLE_RGB_MATRIX_CUSTOM_CYCLE_LEFT_RIGHT
     RGB_MATRIX_CUSTOM_CYCLE_LEFT_RIGHT,
 #endif // ENABLE_RGB_MATRIX_CUSTOM_CYCLE_LEFT_RIGHT
+#ifdef ENABLE_RGB_MATRIX_CUSTOM_CYCLE_OUT_IN
+    RGB_MATRIX_CUSTOM_CYCLE_OUT_IN,
+#endif // ENABLE_RGB_MATRIX_CUSTOM_CYCLE_OUT_IN
 };
 const uint8_t PROGMEM rgb_matrix_direction_supported_modes_count = sizeof(rgb_matrix_direction_supported_modes) / sizeof(rgb_matrix_direction_supported_modes[0]);
 
