@@ -19,6 +19,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#if !defined(SN32F2XX_LED_OUTPUT_LUMINOSITY)
+#    define SN32F2XX_LED_OUTPUT_LUMINOSITY 1
+#endif
 #if !defined(SN32F2XX_LED_OUTPUT_LUMINOSITY_R)
 #    define SN32F2XX_LED_OUTPUT_LUMINOSITY_R 1
 #endif
@@ -31,6 +34,14 @@
 
 #if defined(RGB_MATRIX_SN32F2XX)
 #    define SN32F2XX_LED_COUNT RGB_MATRIX_LED_COUNT
+#   if !defined(SN32F2XX_RGB_MATRIX_ROW_CHANNELS)
+#       define SN32F2XX_RGB_MATRIX_ROW_CHANNELS 3
+#   endif
+#elif defined(LED_MATRIX_SN32F2XX)
+#    define SN32F2XX_LED_COUNT LED_MATRIX_LED_COUNT
+#   if !defined(SN32F2XX_RGB_MATRIX_ROW_CHANNELS)
+#       define SN32F2XX_RGB_MATRIX_ROW_CHANNELS 1
+#   endif
 #endif
 
 #if !defined(SN32F2XX_PWM_OUTPUT_ACTIVE_LEVEL)
@@ -47,10 +58,6 @@
 
 #if !defined(SN32F2XX_PWM_DIRECTION)
 #    define SN32F2XX_PWM_DIRECTION DIODE_DIRECTION
-#endif
-
-#if !defined(SN32F2XX_RGB_MATRIX_ROW_CHANNELS)
-#    define SN32F2XX_RGB_MATRIX_ROW_CHANNELS 3
 #endif
 
 #if !defined(SN32F2XX_RGB_MATRIX_ROWS)
@@ -76,5 +83,10 @@
 
 void sn32f2xx_init(void);
 void sn32f2xx_flush(void);
+#if defined(RGB_MATRIX_SN32F2XX)
 void sn32f2xx_set_color(int index, uint8_t r, uint8_t g, uint8_t b);
 void sn32f2xx_set_color_all(uint8_t r, uint8_t g, uint8_t b);
+#elif defined(LED_MATRIX_SN32F2XX)
+void sn32f2xx_set_value(int index, uint8_t value);
+void sn32f2xx_set_value_all(uint8_t value);
+#endif

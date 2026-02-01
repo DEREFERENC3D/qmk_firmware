@@ -129,4 +129,12 @@ const led_matrix_driver_t led_matrix_driver = {
     .set_value_all = snled27351_set_value_all,
 };
 
+#elif defined(LED_MATRIX_SN32F2XX)
+const led_matrix_driver_t led_matrix_driver = {
+    .init          = sn32f2xx_init,
+    .flush         = sn32f2xx_flush,
+    .set_value     = sn32f2xx_set_value,
+    .set_value_all = sn32f2xx_set_value_all,
+};
+
 #endif
