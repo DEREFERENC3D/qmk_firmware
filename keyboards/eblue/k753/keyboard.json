@@ -6,7 +6,11 @@
     "bootloader": "sn32-dfu",
     "diode_direction": "ROW2COL",
     "eeprom": {
-        "driver": "transient"
+        "driver": "wear_leveling",
+        "wear_leveling": {
+            "driver": "embedded_flash",
+            "backing_size": 64
+        }
     },
     "features": {
         "extrakey": true,
