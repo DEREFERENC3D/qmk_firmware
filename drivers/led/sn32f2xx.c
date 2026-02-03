@@ -345,7 +345,7 @@ static void shared_matrix_scan_keys(matrix_row_t current_matrix[], uint8_t curre
             // For each col...
             matrix_row_t row_shifter = MATRIX_ROW_SHIFTER;
             for (uint8_t col_index = 0; col_index < MATRIX_COLS; col_index++, row_shifter <<= 1) {
-                matrix_read_rows_on_col(current_matrix, current_key, row_shifter);
+                matrix_read_rows_on_col(current_matrix, col_index, row_shifter);
             }
 #        endif // SN32F2XX_PWM_DIRECTION
 #    endif     // DIODE_DIRECTION
