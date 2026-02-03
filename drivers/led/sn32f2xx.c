@@ -84,7 +84,7 @@ static uint8_t last_key_col                                = 0;   // key col sca
 static uint8_t led_duty_cycle[SN32F2XX_RGB_MATRIX_ROWS_HW] = {0}; // track the channel duty cycle
 #    endif
 #endif
-#if (DIODE_DIRECTION == ROW2COL)
+#if (DIODE_DIRECTION == ROW2COL && DIODE_DIRECTION == SN32F2XX_PWM_DIRECTION)
 static matrix_row_t row_shifter = MATRIX_ROW_SHIFTER;
 #endif
 #if defined(SHARED_MATRIX)
