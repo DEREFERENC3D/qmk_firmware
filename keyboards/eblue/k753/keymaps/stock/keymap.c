@@ -1,11 +1,53 @@
 // Copyright 2026 QMK
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include QMK_KEYBOARD_H
+#include "keymap.h"
+
+#ifdef LED_MATRIX_ENABLE
+#include "led_matrix_custom.h"
+#include "eeconfig.h"
+
+user_config_t user_config;
+
+extern bool edit_mode;
+extern uint8_t custom_buf[CUSTOM_MODE_SIZE];
+
+#define BLINK_LENGTH 500
+uint32_t blink_timer;
+
+//uint8_t ret = 0;
+void keyboard_post_init_user(void) {
+    eeconfig_read_user_datablock(&user_config.raw, 0, EECONFIG_USER_DATA_SIZE);
+
+    blink_timer = timer_read32() + BLINK_LENGTH;
+}
+
+void eeconfig_init_user(void) {
+    memset(user_config.raw, 0, EECONFIG_USER_DATA_SIZE);
+    user_config.custom_mode = MODE_2;
+
+    eeconfig_update_user_datablock(&user_config.raw, 0, EECONFIG_USER_DATA_SIZE);
+}
+#endif
 
 enum layer_names {
     BASE,
     WINLK,
     FN,
+};
+
+enum custom_keycode {
+    LM_CSTM = QK_USER_0,
+    LM_MOD1,
+    LM_MOD2,
+    LM_MOD3,
+    LM_MOD4,
+    LM_MOD5,
+    LM_MOD6,
+    LM_MOD7,
+    LM_MOD8,
+    LM_MOD9,
+    LM_MOD0,
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -27,25 +69,79 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
     [FN] = LAYOUT_fullsize_ansi(
         QK_BOOT,            KC_WFAV, KC_MYCM, KC_MAIL, KC_WHOM, KC_MSTP, KC_MPRV, KC_MPLY, KC_MNXT, KC_MSEL, KC_VOLD, KC_VOLU, KC_MUTE, _______, _______, EE_CLR,
-        _______, _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LM_NEXT, _______, _______, _______, _______, _______, _______,
-        _______, _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
+        _______, LM_MOD1,   LM_MOD2, LM_MOD3, LM_MOD4, LM_MOD5, LM_MOD6, LM_MOD7, LM_MOD8, LM_MOD9, LM_MOD0, _______, _______, _______, LM_NEXT, _______, _______, _______, _______, _______, _______,
+        _______, _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, LM_CSTM, _______, _______, _______, _______, _______,
         _______, _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______,                            _______, _______, _______,
         _______,            _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______,          LM_BRIU,          _______, _______, _______, _______,
         _______, TG(WINLK), _______,                            _______,                            _______, _______, _______, _______, LM_SPDD, LM_BRID, LM_SPDU, _______, _______
     ),
 };
 
+#ifdef LED_MATRIX_ENABLE
 #define NUM_LOCK_LED_INDEX 33
 #define CAPS_LOCK_LED_INDEX 58
 #define SCROLL_LOCK_LED_INDEX 14
 #define WIN_LOCK_LED_INDEX 92
 bool led_matrix_indicators_user() {
+    //led_matrix_set_value(ret, 255);
+    if (edit_mode) {
+        static bool state = false;
+
+        if (timer_expired32(timer_read32(), blink_timer)) {
+            state = !state;
+            
+            blink_timer = timer_read32() + BLINK_LENGTH;
+        }
+
+        led_matrix_set_value(NUM_LOCK_LED_INDEX, state ? 255 : 0);
+        led_matrix_set_value(CAPS_LOCK_LED_INDEX, state ? 255 : 0);
+        led_matrix_set_value(SCROLL_LOCK_LED_INDEX, state ? 255 : 0);
+        led_matrix_set_value(WIN_LOCK_LED_INDEX, state ? 255 : 0);
+    }
+
     led_t state = host_keyboard_led_state();
 
     led_matrix_set_value(NUM_LOCK_LED_INDEX, state.num_lock ? 255 : 0);
     led_matrix_set_value(CAPS_LOCK_LED_INDEX, state.caps_lock ? 255 : 0);
     led_matrix_set_value(SCROLL_LOCK_LED_INDEX, state.scroll_lock ? 255 : 0);
     led_matrix_set_value(WIN_LOCK_LED_INDEX, layer_state_is(WINLK) ? 255 : 0);
+
+    return true;
+}
+#endif
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (edit_mode && !layer_state_is(FN) && (keycode != MO(FN) || !record->event.pressed)) {
+        uint8_t index = g_led_config.matrix_co[record->event.key.row][record->event.key.col];
+        custom_mode_set(custom_buf, index, custom_mode_get(custom_buf, index));
+        return false;
+    }
+
+    switch (keycode) {
+        case LM_CSTM:
+        if (record->event.pressed) {
+#ifdef LED_MATRIX_ENABLE
+            led_matrix_custom();
+#endif
+        }
+            return false;
+        case LM_MOD1:
+        case LM_MOD2:
+        case LM_MOD3:
+        case LM_MOD4:
+        case LM_MOD5:
+        case LM_MOD6:
+        case LM_MOD7:
+        case LM_MOD8:
+        case LM_MOD9:
+        case LM_MOD0:
+            if (record->event.pressed) {
+#ifdef LED_MATRIX_ENABLE
+                led_matrix_custom_mode(keycode - LM_MOD1);
+#endif
+            }
+            return false;
+    }
 
     return true;
 }

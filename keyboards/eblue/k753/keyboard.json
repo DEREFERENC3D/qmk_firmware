@@ -9,7 +9,8 @@
         "driver": "wear_leveling",
         "wear_leveling": {
             "driver": "embedded_flash",
-            "backing_size": 64
+            "backing_size": 192,
+            "logical_size": 96
         }
     },
     "features": {
